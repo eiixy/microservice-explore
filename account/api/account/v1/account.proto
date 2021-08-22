@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package api.account.v1;
+
+option go_package = "account/api/account/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.account.v1";
+
+service Account {
+	rpc CreateAccount (CreateAccountRequest) returns (CreateAccountReply);
+	rpc UpdateAccount (UpdateAccountRequest) returns (UpdateAccountReply);
+	rpc DeleteAccount (DeleteAccountRequest) returns (DeleteAccountReply);
+	rpc GetAccount (GetAccountRequest) returns (GetAccountReply);
+	rpc ListAccount (ListAccountRequest) returns (ListAccountReply);
+}
+
+message CreateAccountRequest {}
+message CreateAccountReply {}
+
+message UpdateAccountRequest {}
+message UpdateAccountReply {}
+
+message DeleteAccountRequest {}
+message DeleteAccountReply {}
+
+message GetAccountRequest {}
+message GetAccountReply {}
+
+message ListAccountRequest {}
+message ListAccountReply {}
