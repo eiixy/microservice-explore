@@ -1,6 +1,10 @@
 package main
 
 import (
+	"account/internal/biz"
+	"account/internal/data"
+	"account/internal/server"
+	"account/internal/service"
 	"flag"
 	"os"
 
@@ -78,4 +82,20 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
+}
+
+func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+	dataData, cleanup, err := data.NewData(confData, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	greeterRepo := data.NewGreeterRepo(dataData, logger)
+	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
+	greeterService := service.NewGreeterService(greeterUsecase, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
+	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
+	app := newApp(logger, httpServer, grpcServer)
+	return app, func() {
+		cleanup()
+	}, nil
 }
