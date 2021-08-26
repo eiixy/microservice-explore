@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v2/transport/http"
 
 	v1 "account/api/helloworld/v1"
 	"account/internal/biz"
@@ -29,4 +31,14 @@ func (s *GreeterService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1
 		return nil, v1.ErrorUserNotFound("user not found: %s", in.GetName())
 	}
 	return &v1.HelloReply{Message: "Hello " + in.GetName()}, nil
+}
+
+func RegisterGreeterServer(srv *grpc.Server, service *GreeterService) *grpc.Server {
+	v1.RegisterGreeterServer(srv.Server, service)
+	return srv
+}
+
+func RegisterGreeterHttpServer(srv *http.Server, service *GreeterService) *http.Server {
+	v1.RegisterGreeterHTTPServer(srv, service)
+	return srv
 }

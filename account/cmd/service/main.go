@@ -1,11 +1,9 @@
 package main
 
 import (
-	"account/internal/biz"
-	"account/internal/data"
-	"account/internal/server"
-	"account/internal/service"
 	"flag"
+	"fmt"
+	"github.com/go-kratos/kratos/v2/config/env"
 	"os"
 
 	"account/internal/conf"
@@ -25,12 +23,15 @@ var (
 	Version string
 	// flagconf is the config flag.
 	flagconf string
+	// flagenv is the config flag.
+	flagenv string
 
 	id, _ = os.Hostname()
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagenv, "env", "../.env", "env path, eg: -env .env")
 }
 
 func newApp(logger log.Logger, hs *http.Server, gs *grpc.Server) *kratos.App {
@@ -61,8 +62,10 @@ func main() {
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
+			env.NewSource(flagenv),
 		),
 	)
+
 	if err := c.Load(); err != nil {
 		panic(err)
 	}
@@ -71,6 +74,7 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+	fmt.Printf("boot config: %+v \r\n", bc)
 
 	app, cleanup, err := initApp(bc.Server, bc.Data, logger)
 	if err != nil {
@@ -82,20 +86,4 @@ func main() {
 	if err := app.Run(); err != nil {
 		panic(err)
 	}
-}
-
-func initApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
-	if err != nil {
-		return nil, nil, err
-	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	app := newApp(logger, httpServer, grpcServer)
-	return app, func() {
-		cleanup()
-	}, nil
 }

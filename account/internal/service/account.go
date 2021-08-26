@@ -1,9 +1,9 @@
 package service
 
 import (
-	"context"
-
 	pb "account/api/account/v1"
+	"context"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 )
 
 type AccountService struct {
@@ -29,3 +29,12 @@ func (s *AccountService) GetAccount(ctx context.Context, req *pb.GetAccountReque
 func (s *AccountService) ListAccount(ctx context.Context, req *pb.ListAccountRequest) (*pb.ListAccountReply, error) {
 	return &pb.ListAccountReply{}, nil
 }
+
+func RegisterAccountServer(srv *grpc.Server, service *AccountService) *grpc.Server {
+	pb.RegisterAccountServer(srv.Server, service)
+	return srv
+}
+
+//func RegisterAccountHttpServer(srv *http.Server, service *AccountService) {
+//	pb.RegisterAccountServer(srv.Server, service)
+//}

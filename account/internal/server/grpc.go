@@ -1,7 +1,6 @@
 package server
 
 import (
-	v1 "account/api/helloworld/v1"
 	"account/internal/conf"
 	"account/internal/service"
 	"github.com/go-kratos/kratos/v2/log"
@@ -33,7 +32,5 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 	if c.Grpc.Timeout != nil {
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
-	srv := grpc.NewServer(opts...)
-	v1.RegisterGreeterServer(srv, greeter)
-	return srv
+	return grpc.NewServer(opts...)
 }
